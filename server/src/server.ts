@@ -163,7 +163,6 @@ function beginNextRound(room: Room) {
 }
 
 io.on("connection", (socket) => {
-  console.log(`Connected: ${socket.id}`);
 
   socket.on("request_player_id", () => {
     socket.emit("your_player_id", {
@@ -662,7 +661,6 @@ io.on("connection", (socket) => {
   );
 
   socket.on("disconnect", () => {
-    console.log(`Disconnected: ${socket.id}`);
 
     const room = getRoomForPlayer(socket.id);
 
