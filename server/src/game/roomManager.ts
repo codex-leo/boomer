@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { GameMode, Player, Room } from "../types.js";
+import type { ChallengeType, GameMode, Player, Room } from "../types.js";
 
 export const MAX_ROOMS = 2;
 export const MAX_PLAYERS_PER_ROOM = 15;
@@ -24,6 +24,7 @@ export function createRoom(
   hostId: string,
   mode: GameMode,
   totalRounds: number,
+  enabledChallenges: ChallengeType[],
 ): Room | null {
   if (rooms.size >= MAX_ROOMS) {
     return null;
@@ -34,6 +35,7 @@ export function createRoom(
     hostId,
     mode,
     totalRounds,
+    enabledChallenges,
     players: new Map(),
     status: "waiting",
     currentRound: 0,
@@ -45,6 +47,19 @@ export function createRoom(
   rooms.set(room.id, room);
 
   return room;
+}
+
+export function resetRoomForReplay(room: Room) {
+  room.status = "waiting";
+  room.currentRound = 0;
+  room.usedQuestionIds.clear();
+  room.activeRound = undefined;
+  room.truthDareType = null;
+  room.truthDareChallenge = "";
+
+  for (const player of room.players.values()) {
+    player.score = 0;
+  }
 }
 
 export function getRoom(roomId: string): Room | undefined {

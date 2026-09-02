@@ -9,7 +9,9 @@ import {
   addPlayer,
   removePlayer,
   getRoomForPlayer,
+  resetRoomForReplay,
 } from "./game/roomManager.js";
+import type { ChallengeType } from "./types.js";
 
 import { startGame, createNextRound } from "./game/gameManager.js";
 
@@ -118,6 +120,10 @@ function getLeaderboard(room: Room) {
 }
 
 function getTruthDarePlayers(room: Room) {
+  if (!room.enabledChallenges.includes("truth-dare")) {
+    return null;
+  }
+
   const leaderboard = getLeaderboard(room);
 
   if (leaderboard.length < 2) {
@@ -235,6 +241,7 @@ io.on("connection", (socket) => {
         name: unknown;
         mode: unknown;
         totalRounds: unknown;
+        enabledChallenges?: unknown;
       },
       callback,
     ) => {
@@ -283,7 +290,33 @@ io.on("connection", (socket) => {
         return;
       }
 
-      const room = createRoom(socket.id, data.mode, totalRounds);
+      let enabledChallenges: ChallengeType[] = ["truth-dare"];
+
+      if (data.enabledChallenges !== undefined) {
+        if (
+          !Array.isArray(data.enabledChallenges) ||
+          !data.enabledChallenges.every(
+            (challenge) => challenge === "truth-dare",
+          )
+        ) {
+          callback({
+            success: false,
+            reason: "Invalid challenge selection.",
+          });
+          return;
+        }
+
+        enabledChallenges = [
+          ...new Set(data.enabledChallenges),
+        ] as ChallengeType[];
+      }
+
+      const room = createRoom(
+        socket.id,
+        data.mode,
+        totalRounds,
+        enabledChallenges,
+      );
 
       if (!room) {
         callback({
@@ -589,6 +622,39 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on(
+    "play_again",
+    (
+      data: { roomId: unknown },
+      callback,
+    ) => {
+      const roomId =
+        typeof data?.roomId === "string"
+          ? data.roomId.trim().toUpperCase()
+          : "";
+      const room = getRoom(roomId);
+
+      if (!room) {
+        callback({ success: false, reason: "Room not found." });
+        return;
+      }
+
+      if (room.hostId !== socket.id) {
+        callback({ success: false, reason: "Only the host can restart the game." });
+        return;
+      }
+
+      if (room.status !== "finished") {
+        callback({ success: false, reason: "The game has not finished yet." });
+        return;
+      }
+
+      resetRoomForReplay(room);
+      callback({ success: true });
+      io.to(room.id).emit("game_reset", { room: serializeRoom(room) });
+      io.to(room.id).emit("room_updated", { room: serializeRoom(room) });
+    },
+  );
   socket.on("spin_truth_dare", (data: { roomId: unknown }) => {
     const roomId =
       typeof data?.roomId === "string" ? data.roomId.trim().toUpperCase() : "";
@@ -600,6 +666,10 @@ io.on("connection", (socket) => {
     const room = getRoom(roomId);
 
     if (!room) {
+      return;
+    }
+
+    if (room.status !== "finished") {
       return;
     }
 
@@ -643,6 +713,10 @@ io.on("connection", (socket) => {
       const room = getRoom(roomId);
 
       if (!room) {
+        return;
+      }
+
+      if (room.status !== "finished") {
         return;
       }
 
@@ -698,6 +772,7 @@ function serializeRoom(room: ReturnType<typeof getRoom>) {
     hostId: room.hostId,
     mode: room.mode,
     totalRounds: room.totalRounds,
+    enabledChallenges: room.enabledChallenges,
     status: room.status,
     currentRound: room.currentRound,
     players: [...room.players.values()],

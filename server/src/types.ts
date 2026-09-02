@@ -1,4 +1,5 @@
 export type GameMode = "song" | "actor";
+export type ChallengeType = "truth-dare";
 
 export type RoomStatus =
   | "waiting"
@@ -26,6 +27,7 @@ export interface Room {
 
   mode: GameMode;
   totalRounds: number;
+  enabledChallenges: ChallengeType[];
 
   players: Map<string, Player>;
 

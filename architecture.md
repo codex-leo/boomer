@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Song Guessor (branded in the UI as **Boomer / Bollywood Guessor**) is a browser-based multiplayer guessing game. A host creates a room, shares a six-character code or QR invite URL, and starts a timed game. For each round, the server selects a song and sends its YouTube video ID to all room members. Players submit song-title guesses; the server validates them, awards points in correct-answer order, reveals the answer at the end of the round, and publishes a final leaderboard. A final truth-or-dare interaction is available when at least two players finish.
+Song Guessor (branded in the UI as **Boomer / Bollywood Guessor**) is a browser-based multiplayer guessing game. A host creates a room, shares a six-character code or QR invite URL, and starts a timed game. For each round, the server selects a song and sends its YouTube video ID to all room members. Players submit song-title guesses; the server validates them, awards points in correct-answer order, reveals the answer at the end of the round, and publishes a final leaderboard. The host can opt into the currently available `truth-dare` post-game challenge when creating the room.
 
 The create screen exposes `song` and `actor` modes, but the current game implementation always selects from `SONG_QUESTIONS`, labels the gameplay as song guessing, and embeds song YouTube IDs. Actor-specific questions or behavior are **not currently implemented**.
 
@@ -28,8 +28,8 @@ The create screen exposes `song` and `actor` modes, but the current game impleme
 
 - The frontend connects to `import.meta.env.VITE_SERVER_URL`, defaulting to `http://localhost:3000`.
 - The backend listens on `process.env.PORT`, defaulting to `3000`, and allows `process.env.CLIENT_URL`, defaulting to `http://localhost:5173`, in both Express CORS and Socket.IO CORS settings.
-- No `.env` file is committed (`.env` is ignored). No Vercel configuration, Render configuration, Dockerfile, CI workflow, or deployment manifest exists in this repository.
-- Vercel frontend and Render backend are therefore a compatible deployment pattern, not a checked-in deployment implementation:
+- No `.env` file is committed (`.env` is ignored). The frontend includes `client/vercel.json` for SPA history fallback; there is no Render configuration, Dockerfile, CI workflow, or backend deployment manifest.
+- Vercel frontend and Render backend are the intended deployment pattern:
 
 ```text
 Browser -> Vercel-hosted Vite build -> Socket.IO connection -> Render-hosted Node/Express server
@@ -44,6 +44,7 @@ For that arrangement, Vercel would need `VITE_SERVER_URL` set to the backend pub
 client/
   index.html                 Vite HTML shell
   package.json               frontend scripts and dependencies
+  vercel.json                Vercel rewrite of all SPA routes to index.html
   vite.config.ts             React and Tailwind Vite plugins
   tsconfig*.json             project-reference TypeScript configuration
   src/
@@ -90,7 +91,9 @@ The root contains only `.gitignore` besides these projects; it ignores dependenc
 
 ### `Game.tsx` state and screens
 
-`Game.tsx` stores transient client presentation state: three-second countdown and local visible timer; round and total-round numbers; the received YouTube ID; answer text, answer result, and correct-submission lock; revealed answer and sorted player list; and final truth-or-dare state. It registers its listeners when mounted, emits `request_player_id`, and removes listeners on unmount.
+`CreateGame.tsx` lets the host enable or disable post-game challenge modules. The selected `enabledChallenges` array is sent to the server when the room is created.
+
+`Game.tsx` stores transient client presentation state: three-second countdown and local visible timer; round and total-round numbers; the received YouTube ID; answer text, answer result, and correct-submission lock; revealed answer and sorted player list; final challenge state; and Play Again request state. It registers its listeners when mounted, emits `request_player_id`, and removes listeners on unmount.
 
 On `game_countdown`, it displays local values 3, 2, and 1. On `round_started`, it receives only the question ID and YouTube ID, starts a local 30-second visual timer from the supplied duration, and renders an invisible 1px YouTube iframe with `autoplay=1`, `controls=0`, and `rel=0`. The visible panel contains only gameplay text, so audio is intended to play without displaying video. Browser autoplay policy, embed availability, and user/device settings can prevent this playback.
 
@@ -132,10 +135,11 @@ At round end, `round_ended` reveals the title and movie and includes a sorted le
 
 ## Room Lifecycle
 
-1. `create_room` rejects a socket already found in a room, validates nickname/mode/round count, creates an in-memory waiting room, inserts the host player, joins the socket to the Socket.IO room, acknowledges, and emits `room_updated`.
+1. `create_room` rejects a socket already found in a room, validates nickname/mode/round count/challenge selection, creates an in-memory waiting room, inserts the host player, joins the socket to the Socket.IO room, acknowledges, and emits `room_updated`.
 2. `join_room` normalizes the code, validates nickname, rejects an already-roomed socket, validates room availability and case-insensitive duplicate names, adds a non-host player only while waiting, joins the Socket.IO room, acknowledges, and emits `room_updated`.
 3. `get_room` returns serialized public room state. Serialization exposes ID, host ID, mode, round count, status, current round, and the player array; it does not expose questions, used IDs, or active-round details.
 4. On socket disconnect, the player is immediately removed. An empty room is deleted. If the departing player was host, the first remaining `Map` player becomes host. Remaining sockets receive `room_updated`.
+5. After `finished`, the host can emit `play_again`. The server resets every player's score, round counters, used questions, active round, and transient challenge state while retaining the same room code, players, host, mode, total rounds, and enabled challenge selection. It emits `game_reset` and `room_updated`; clients navigate back to the lobby.
 
 Reconnection/identity restoration is **not implemented**. Socket IDs are player IDs, so reconnecting creates a new ID and the previous disconnect has already removed the old player. Rooms are not restored after a process restart.
 
@@ -159,13 +163,15 @@ Reconnection/identity restoration is **not implemented**. Socket IDs are player 
 | Client -> server | `join_room` | `{ roomId, name }`, acknowledgement | Join a waiting room. |
 | Server -> room | `room_updated` | `{ room: serializedRoom }` | Publish membership/host changes and initial room creation. |
 | Client -> server | `start_game` | `{ roomId }`, acknowledgement | Host-only request to begin. |
+| Client -> server | `play_again` | `{ roomId }`, acknowledgement | Host-only request to reset a finished game in the same room. |
+| Server -> room | `game_reset` | `{ room: serializedRoom }` | Tell all players to return to the reset lobby. |
 | Server -> room | `game_countdown` | `{ round, totalRounds }` | Tell lobby/game clients to navigate/show a three-second countdown. |
 | Server -> room | `round_started` | `{ round, totalRounds, question: { id, youtubeId }, duration }` | Start a playable round without answer metadata. |
 | Client -> server | `submit_answer` | `{ roomId, answer }` | Submit a title guess. No acknowledgement. |
 | Server -> sender | `answer_result` | `{ correct, points, position? }` | Return the sender's validation and score outcome. |
 | Server -> room | `leaderboard_updated` | `{ players }` | Publish scores after a correct answer. |
 | Server -> room | `round_ended` | `{ round, answer: { title, movie } \| null, players }` | Reveal answer and round scores. |
-| Server -> room | `game_finished` | `{ players, truthDarePlayers: { giver, receiver } \| null }` | Publish final scores and optional final-game roles. |
+| Server -> room | `game_finished` | `{ players, truthDarePlayers: { giver, receiver } \| null }` | Publish final scores and optional final-game roles; null when `truth-dare` is disabled. |
 | Client -> server | `spin_truth_dare` | `{ roomId }` | Lowest-ranked player requests a random truth/dare type. |
 | Server -> room | `truth_dare_result` | `{ type: "truth" \| "dare" }` | Publish random selection. |
 | Client -> server | `submit_truth_dare_challenge` | `{ roomId, challenge }` | Highest-ranked player sends challenge text. |
@@ -174,10 +180,11 @@ Reconnection/identity restoration is **not implemented**. Socket IDs are player 
 ## Data Models / Types
 
 - `GameMode`: `"song" | "actor"`.
+- `ChallengeType`: currently `"truth-dare"`; `Room.enabledChallenges` is an extensible list for future post-game challenge modules.
 - `RoomStatus`: `"waiting" | "countdown" | "playing" | "round-result" | "finished"`.
 - `Player`: socket `id`, display `name`, numeric `score`, and `isHost` flag.
 - `ActiveRound`: selected `questionId`, timestamp `startedAt`, and `answeredPlayers: Set<string>` containing only correct solvers.
-- Server `Room`: ID, host ID, mode, total rounds, `Map` of players, status, current round, used-question ID set, optional active round, and final truth/dare type/challenge state.
+- Server `Room`: ID, host ID, mode, total rounds, enabled challenge list, `Map` of players, status, current round, used-question ID set, optional active round, and final truth/dare type/challenge state.
 - `SongQuestion`: ID, title, movie, optional artist, YouTube ID, and accepted aliases. The current data entries do not set `artist`.
 - Client `Room`: public serialized subset with `players: Player[]` and `status: string`; it does not model `ActiveRound`, question data, or truth/dare fields.
 
@@ -210,11 +217,13 @@ Incorrect guesses score 0 and may be retried. There is no time-decay calculation
 - There is no HTTP API beyond `/health`, database, user authentication, rate limiting, or persistent analytics.
 - Socket payload validation is partial: room, nickname, mode, and answer types are guarded, but challenge text has no length/content validation and payload schemas are not centralized.
 - `actor` mode is selectable and stored but has no actor-specific question, playback, validation, or UI implementation.
+- Post-game challenges are modular at the room configuration boundary via `enabledChallenges`; only `truth-dare` is implemented today. When disabled, no Truth/Dare panel is shown and its server events are rejected.
+- Play Again resets the current room for another waiting-to-playing cycle without changing its room code or player membership.
 - The first game countdown is emitted twice by the start flow.
 - The `Game` page does not request an initial room/game snapshot; direct navigation, a late connection, or remount during an already-running game can miss prior realtime events.
 - Client timers/countdowns are visual approximations driven by receipt time; the server alone enforces actual round duration.
 - YouTube embedding depends on third-party availability and browser autoplay/embed restrictions. The app embeds YouTube directly; it does not download or extract audio. The client can hide the iframe's in-page controls and request `stopVideo`, but phone lock-screen/media-center controls are owned by the browser/OS Media Session and cannot be reliably hidden or disabled by this application; some devices may still reveal that media is playing.
-- No deployment configuration is committed, and restricted CORS means production origins must be configured correctly outside the repository.
+- Backend deployment configuration is not committed, and restricted CORS means production origins must be configured correctly outside the repository. The frontend's Vercel rewrite is committed in `client/vercel.json`.
 
 ## Important Invariants
 

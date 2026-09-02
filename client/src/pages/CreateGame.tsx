@@ -16,6 +16,7 @@ function CreateGame() {
   const [name, setName] = useState("");
   const [mode, setMode] = useState<GameMode>(initialMode);
   const [rounds, setRounds] = useState(5);
+  const [truthDareEnabled, setTruthDareEnabled] = useState(true);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +36,7 @@ function CreateGame() {
         name,
         mode,
         totalRounds: rounds,
+        enabledChallenges: truthDareEnabled ? ["truth-dare"] : [],
       },
       (response: {
         success: boolean;
@@ -86,6 +88,21 @@ function CreateGame() {
                 className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 outline-none transition focus:border-yellow-500"
               />
             </div>
+
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-700 bg-zinc-950 p-4">
+              <input
+                type="checkbox"
+                checked={truthDareEnabled}
+                onChange={(event) => setTruthDareEnabled(event.target.checked)}
+                className="mt-1 h-4 w-4 accent-yellow-500"
+              />
+              <span>
+                <span className="block font-semibold">Truth or Dare after the game</span>
+                <span className="mt-1 block text-sm text-zinc-400">
+                  Let the highest and lowest scorers play one final challenge.
+                </span>
+              </span>
+            </label>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-zinc-300">

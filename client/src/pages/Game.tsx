@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { socket } from "../lib/socket";
 import type { Player } from "../types";
@@ -54,6 +54,7 @@ interface TruthDarePlayer {
 
 function Game() {
     const { roomCode } = useParams();
+    const navigate = useNavigate();
 
     const [countdown, setCountdown] = useState<number | null>(null);
 
@@ -101,6 +102,12 @@ function Game() {
         useState(false);
 
     const [gameFinished, setGameFinished] = useState(false);
+    const [playingAgain, setPlayingAgain] = useState(false);
+    const [playAgainError, setPlayAgainError] = useState("");
+
+    const isHost = players.some(
+        (player) => player.id === currentPlayerId && player.isHost,
+    );
 
     function stopYouTubePlayback() {
         const frame = youtubeFrameRef.current;
@@ -234,6 +241,10 @@ function Game() {
             setTruthDarePlayers(data.truthDarePlayers);
         }
 
+        function handleGameReset() {
+            navigate(`/lobby/${roomCode}`);
+        }
+
         function handleTruthDareResult(data: {
             type: "truth" | "dare";
         }) {
@@ -262,6 +273,7 @@ function Game() {
             handleTruthDareResult,
         );
         socket.on("truth_dare_challenge", handleTruthDareChallenge);
+        socket.on("game_reset", handleGameReset);
 
         socket.emit("request_player_id");
 
@@ -286,8 +298,9 @@ function Game() {
             );
             socket.off("your_player_id", handleYourPlayerId);
             socket.off("truth_dare_challenge", handleTruthDareChallenge);
+            socket.off("game_reset", handleGameReset);
         };
-    }, []);
+    }, [navigate, roomCode]);
 
     useEffect(() => {
         if (timeLeft === null || roundEnded) {
@@ -379,7 +392,7 @@ function Game() {
                         ))}
 
                     </div>
-                    {truthDarePlayers && (
+                        {truthDarePlayers && (
                         <section className="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-6 text-center">
 
                             <p className="text-xs font-bold uppercase tracking-[0.25em] text-yellow-400">
@@ -514,6 +527,35 @@ function Game() {
                             </div>
 
                         </section>
+                    )}
+
+                    {isHost && (
+                        <div className="mt-8 text-center">
+                            {playAgainError && (
+                                <p className="mb-3 text-sm text-red-300">{playAgainError}</p>
+                            )}
+                            <button
+                                type="button"
+                                disabled={playingAgain}
+                                onClick={() => {
+                                    setPlayingAgain(true);
+                                    setPlayAgainError("");
+                                    socket.emit(
+                                        "play_again",
+                                        { roomId: roomCode },
+                                        (response: { success: boolean; reason?: string }) => {
+                                            if (!response.success) {
+                                                setPlayingAgain(false);
+                                                setPlayAgainError(response.reason ?? "Unable to restart game.");
+                                            }
+                                        },
+                                    );
+                                }}
+                                className="min-h-12 rounded-xl bg-yellow-500 px-6 font-bold text-black hover:bg-yellow-400 disabled:opacity-50"
+                            >
+                                {playingAgain ? "Returning to lobby..." : "Play Again"}
+                            </button>
+                        </div>
                     )}
 
                 </div>
