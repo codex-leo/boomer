@@ -156,6 +156,7 @@ function beginNextRound(room: Room) {
       round: room.currentRound,
       totalRounds: room.totalRounds,
       question: nextRound.question,
+      duration: ROUND_DURATION_MS,
     });
 
     startRoundTimer(room);

@@ -11,6 +11,7 @@ interface RoundStartedData {
         id: string;
         youtubeId: string;
     };
+    duration: number;
 }
 
 interface RoundEndedData {
@@ -55,6 +56,8 @@ function Game() {
     const { roomCode } = useParams();
 
     const [countdown, setCountdown] = useState<number | null>(null);
+
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
     const [round, setRound] = useState(0);
     const [totalRounds, setTotalRounds] = useState(0);
@@ -154,6 +157,7 @@ function Game() {
             setYoutubeId(data.question.youtubeId);
 
             setCountdown(null);
+            setTimeLeft(Math.ceil(data.duration / 1000));
 
             setAnswer("");
             setSubmitted(false);
@@ -176,6 +180,7 @@ function Game() {
 
         function handleRoundEnded(data: RoundEndedData) {
             setRoundEnded(true);
+            setTimeLeft(null);
 
             setRevealedAnswer(data.answer);
 
@@ -242,6 +247,26 @@ function Game() {
             socket.off("truth_dare_challenge", handleTruthDareChallenge);
         };
     }, []);
+
+    useEffect(() => {
+        if (timeLeft === null || roundEnded) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setTimeLeft((current) => {
+                if (current === null || current <= 1) {
+                    return 0;
+                }
+
+                return current - 1;
+            });
+        }, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [timeLeft, roundEnded]);
 
     function submitAnswer() {
         if (!answer.trim() || submitted) {
@@ -469,8 +494,21 @@ function Game() {
                             </h1>
                         </div>
 
-                        <div className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold">
-                            🎬 {roomCode}
+                        <div className="flex items-center gap-2">
+                            {timeLeft !== null && !roundEnded && (
+                                <div
+                                    className={`rounded-full px-4 py-2 text-sm font-black ${timeLeft <= 5
+                                            ? "bg-red-500 text-white"
+                                            : "bg-zinc-900 text-white"
+                                        }`}
+                                >
+                                    ⏱️ {timeLeft}s
+                                </div>
+                            )}
+
+                            <div className="rounded-full bg-zinc-900 px-4 py-2 text-sm font-semibold">
+                                🎬 {roomCode}
+                            </div>
                         </div>
 
                     </div>
