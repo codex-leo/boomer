@@ -54,8 +54,16 @@ app.get("/health", (_req, res) => {
 });
 
 function startRoundTimer(room: Room) {
+  const activeRound = room.activeRound;
+
+  if (!activeRound) {
+    return;
+  }
+
   setTimeout(() => {
-    if (room.status !== "playing") {
+    // A round that ended early still has this timeout pending. Identity
+    // checking prevents that stale timeout from ending a later round.
+    if (room.status !== "playing" || room.activeRound !== activeRound) {
       return;
     }
 
@@ -94,13 +102,7 @@ function startRoundTimer(room: Room) {
       return;
     }
 
-    setTimeout(() => {
-      if (room.status !== "round-result") {
-        return;
-      }
-
-      beginNextRound(room);
-    }, 3000);
+    scheduleNextRound(room, room.currentRound);
   }, ROUND_DURATION_MS);
 }
 
@@ -150,6 +152,8 @@ function beginNextRound(room: Room) {
         players: getLeaderboard(room),
         truthDarePlayers,
       });
+
+      return;
     }
 
     io.to(room.id).emit("round_started", {
@@ -160,6 +164,19 @@ function beginNextRound(room: Room) {
     });
 
     startRoundTimer(room);
+  }, 3000);
+}
+
+function scheduleNextRound(room: Room, completedRound: number) {
+  setTimeout(() => {
+    if (
+      room.status !== "round-result" ||
+      room.currentRound !== completedRound
+    ) {
+      return;
+    }
+
+    beginNextRound(room);
   }, 3000);
 }
 
@@ -459,11 +476,6 @@ io.on("connection", (socket) => {
         success: true,
       });
 
-      io.to(room.id).emit("game_countdown", {
-        round: room.currentRound + 1,
-        totalRounds: room.totalRounds,
-      });
-
       beginNextRound(room);
     },
   );
@@ -572,13 +584,7 @@ io.on("connection", (socket) => {
           return;
         }
 
-        setTimeout(() => {
-          if (room.status !== "round-result") {
-            return;
-          }
-
-          beginNextRound(room);
-        }, 3000);
+        scheduleNextRound(room, room.currentRound);
       }
     }
   });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { socket } from "../lib/socket";
@@ -63,6 +63,8 @@ function Game() {
     const [totalRounds, setTotalRounds] = useState(0);
 
     const [youtubeId, setYoutubeId] = useState<string | null>(null);
+    const youtubeFrameRef = useRef<HTMLIFrameElement | null>(null);
+    const countdownTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
     const [answer, setAnswer] = useState("");
 
@@ -100,6 +102,34 @@ function Game() {
 
     const [gameFinished, setGameFinished] = useState(false);
 
+    function stopYouTubePlayback() {
+        const frame = youtubeFrameRef.current;
+
+        if (!frame) {
+            return;
+        }
+
+        // Ask the YouTube player to stop, then navigate the iframe away from
+        // the media source so an unmount cannot leave playback running.
+        frame.contentWindow?.postMessage(
+            JSON.stringify({
+                event: "command",
+                func: "stopVideo",
+                args: [],
+            }),
+            "https://www.youtube.com",
+        );
+        frame.src = "about:blank";
+    }
+
+    function clearCountdownTimers() {
+        for (const timer of countdownTimersRef.current) {
+            clearTimeout(timer);
+        }
+
+        countdownTimersRef.current = [];
+    }
+
     function spinTruthDare() {
         if (isSpinning) {
             return;
@@ -129,19 +159,25 @@ function Game() {
 
     useEffect(() => {
         function handleCountdown(data: CountdownData) {
+            clearCountdownTimers();
+            stopYouTubePlayback();
+
             setRound(data.round);
             setTotalRounds(data.totalRounds);
 
             setYoutubeId(null);
+            setTimeLeft(null);
             setAnswer("");
             setSubmitted(false);
             setAnswerResult(null);
 
             setCountdown(3);
 
-            setTimeout(() => setCountdown(2), 1000);
-            setTimeout(() => setCountdown(1), 2000);
-            setTimeout(() => setCountdown(0), 3000);
+            countdownTimersRef.current = [
+                setTimeout(() => setCountdown(2), 1000),
+                setTimeout(() => setCountdown(1), 2000),
+                setTimeout(() => setCountdown(0), 3000),
+            ];
         }
 
         function handleYourPlayerId(data: { id: string }) {
@@ -149,6 +185,7 @@ function Game() {
         }
 
         function handleRoundStarted(data: RoundStartedData) {
+            stopYouTubePlayback();
             setRoundEnded(false);
             setRevealedAnswer(null);
             setRound(data.round);
@@ -179,6 +216,8 @@ function Game() {
         }
 
         function handleRoundEnded(data: RoundEndedData) {
+            stopYouTubePlayback();
+            setYoutubeId(null);
             setRoundEnded(true);
             setTimeLeft(null);
 
@@ -227,6 +266,8 @@ function Game() {
         socket.emit("request_player_id");
 
         return () => {
+            clearCountdownTimers();
+            stopYouTubePlayback();
             socket.off("game_countdown", handleCountdown);
             socket.off("round_started", handleRoundStarted);
             socket.off("answer_result", handleAnswerResult);
@@ -542,8 +583,10 @@ function Game() {
                                 {youtubeId ? (
                                     <div className="relative aspect-video w-full overflow-hidden">
                                         <iframe
+                                            key={youtubeId}
+                                            ref={youtubeFrameRef}
                                             className="absolute left-1/2 top-1/2 h-px w-px -translate-x-1/2 -translate-y-1/2 opacity-0"
-                                            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&controls=0&rel=0`}
+                                            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&playsinline=1&rel=0&enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}`}
                                             title="Song audio"
                                             allow="autoplay; encrypted-media"
                                         />
