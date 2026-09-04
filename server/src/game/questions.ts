@@ -213,7 +213,7 @@ export const SONG_QUESTIONS: SongQuestion[] = [
     title: "Ilahi",
     movie: "Yeh Jawaani Hai Deewani",
     youtubeId: "fdubeMFwuGs",
-    aliases: ["ilahi"],
+    aliases: ["ilahi, ilaahi"],
   },
 
   {
@@ -277,7 +277,7 @@ export const SONG_QUESTIONS: SongQuestion[] = [
     title: "Tune Maari Entriyaan",
     movie: "Gunday",
     youtubeId: "2I3NgxDAiqE",
-    aliases: ["tune maari entriyaan"],
+    aliases: ["tune maari entriyaan", "tune maari entriyaa"],
   },
 
   {
@@ -310,5 +310,484 @@ export const SONG_QUESTIONS: SongQuestion[] = [
     movie: "Malang",
     youtubeId: "KBIq11mNB0I",
     aliases: ["malang", "malang title track"],
+  },
+  {
+    id: "song-039",
+    title: "Ae Dil Hai Mushkil",
+    movie: "Ae Dil Hai Mushkil",
+    youtubeId: "6FURuLYrR_Q",
+    aliases: [
+      "ae dil hai mushkil",
+      "adhm title track",
+    ],
+  },
+ 
+  {
+    id: "song-040",
+    title: "Manwa Laage",
+    movie: "Happy New Year",
+    youtubeId: "d8IT-16kA8M",
+    aliases: [
+      "manwa laage",
+      "manwa laage o manwa",
+    ],
+  },
+ 
+  {
+    id: "song-041",
+    title: "Kabira",
+    movie: "Yeh Jawaani Hai Deewani",
+    youtubeId: "jHNNMj5bNQw",
+    aliases: [
+      "kabira",
+    ],
+  },
+ 
+  {
+    id: "song-042",
+    title: "Nashe Si Chadh Gayi",
+    movie: "Befikre",
+    youtubeId: "HoCwa6gnmM0",
+    aliases: [
+      "nashe si chadh gayi",
+      "nashe si chad gayi",
+    ],
+  },
+ 
+  {
+    id: "song-043",
+    title: "Hawayein",
+    movie: "Jab Harry Met Sejal",
+    youtubeId: "lBACSadCKaQ",
+    aliases: [
+      "hawayein",
+      "hawaein",
+      "hawaaye"
+    ],
+  },
+ 
+  {
+    id: "song-044",
+    title: "Zinda",
+    movie: "Bhaag Milkha Bhaag",
+    youtubeId: "fP6MNznzVcQ",
+    aliases: [
+      "zinda",
+    ],
+  },
+ 
+  {
+    id: "song-045",
+    title: "Naina",
+    movie: "Dangal",
+    youtubeId: "yXbeYaVQ8JY",
+    aliases: [
+      "naina",
+    ],
+  },
+ 
+  {
+    id: "song-046",
+    title: "Ghoomar",
+    movie: "Padmaavat",
+    youtubeId: "CU1tFtk_NFY",
+    aliases: [
+      "ghoomar",
+      "ghumar",
+    ],
+  },
+ 
+  {
+    id: "song-047",
+    title: "Malhari",
+    movie: "Bajirao Mastani",
+    youtubeId: "YUH9jD__qHY",
+    aliases: [
+      "malhari",
+    ],
+  },
+ 
+  {
+    id: "song-048",
+    title: "Deewani Mastani",
+    movie: "Bajirao Mastani",
+    youtubeId: "RIofkrOFFSw",
+    aliases: [
+      "deewani mastani",
+      "diwani mastani",
+    ],
+  },
+ 
+  {
+    id: "song-049",
+    title: "Pinga",
+    movie: "Bajirao Mastani",
+    youtubeId: "xz-Vac75to4",
+    aliases: [
+      "pinga",
+    ],
+  },
+ 
+  {
+    id: "song-050",
+    title: "Chogada",
+    movie: "Loveyatri",
+    youtubeId: "yr7JFNsz5dU",
+    aliases: [
+      "chogada",
+      "chogada tara",
+    ],
+  },
+ 
+  {
+    id: "song-051",
+    title: "Kala Chashma",
+    movie: "Baar Baar Dekho",
+    youtubeId: "ph4i-C8UC1w",
+    aliases: [
+      "kala chashma",
+      "kaala chashma",
+    ],
+  },
+ 
+  {
+    id: "song-052",
+    title: "Aankh Marey",
+    movie: "Simmba",
+    youtubeId: "H1-RSRXmdpo",
+    aliases: [
+      "aankh marey",
+      "aankh maarey",
+    ],
+  },
+ 
+  {
+    id: "song-053",
+    title: "Muqabla",
+    movie: "Street Dancer 3D",
+    youtubeId: "l75z7FrYRXI",
+    aliases: [
+      "muqabla",
+      "mukkala muqabla",
+    ],
+  },
+ 
+  {
+    id: "song-054",
+    title: "Chaleya",
+    movie: "Jawan",
+    youtubeId: "LHEU3tE_biU",
+    aliases: [
+      "chaleya",
+    ],
+  },
+ 
+  {
+    id: "song-055",
+    title: "Zinda Banda",
+    movie: "Jawan",
+    youtubeId: "stjZKBhQ3lg",
+    aliases: [
+      "zinda banda",
+    ],
+  },
+ 
+  {
+    id: "song-056",
+    title: "Ve Kamleya",
+    movie: "Rocky Aur Rani Kii Prem Kahaani",
+    youtubeId: "QXJyMpxd210",
+    aliases: [
+      "ve kamleya",
+      "kamleya",
+    ],
+  },
+ 
+  {
+    id: "song-057",
+    title: "What Jhumka",
+    movie: "Rocky Aur Rani Kii Prem Kahaani",
+    youtubeId: "P1fIdFRnfqw",
+    aliases: [
+      "what jhumka",
+    ],
+  },
+ 
+  {
+    id: "song-058",
+    title: "Suraj Hua Maddham",
+    movie: "Kabhi Khushi Kabhie Gham",
+    youtubeId: "L0zKs8i7Nc8",
+    aliases: [
+      "suraj hua maddham",
+      "suraj hua madham",
+    ],
+  },
+ 
+  {
+    id: "song-059",
+    title: "Bole Chudiyan",
+    movie: "Kabhi Khushi Kabhie Gham",
+    youtubeId: "IBvg3WeqP1U",
+    aliases: [
+      "bole chudiyan",
+      "bole chudiyaan",
+      "bole chudiyaa"
+    ],
+  },
+ 
+  {
+    id: "song-060",
+    title: "Sadda Haq",
+    movie: "Rockstar",
+    youtubeId: "n6mraYuSELU",
+    aliases: [
+      "sadda haq",
+      "saadda haq",
+      "sadda haq aithe rakh",
+    ],
+  },
+ 
+  {
+    id: "song-061",
+    title: "Kun Faya Kun",
+    movie: "Rockstar",
+    youtubeId: "T94PHkuydcw",
+    aliases: [
+      "kun faya kun",
+    ],
+  },
+ 
+  {
+    id: "song-062",
+    title: "Galliyan",
+    movie: "Ek Villain",
+    youtubeId: "FxAG_11PzCk",
+    aliases: [
+      "galliyan",
+      "galliyaa",
+      "galliya"
+    ],
+  },
+ 
+  {
+    id: "song-063",
+    title: "Humdard",
+    movie: "Ek Villain",
+    youtubeId: "FJ55SHCzt88",
+    aliases: [
+      "humdard",
+      "hamdard",
+    ],
+  },
+ 
+  {
+    id: "song-064",
+    title: "Swag Se Swagat",
+    movie: "Tiger Zinda Hai",
+    youtubeId: "7TRFf7uUfhQ",
+    aliases: [
+      "swag se swagat",
+    ],
+  },
+ 
+  {
+    id: "song-065",
+    title: "Dil Diyan Gallan",
+    movie: "Tiger Zinda Hai",
+    youtubeId: "JtnPpxe8K7c",
+    aliases: [
+      "dil diyan gallan",
+      "dil diya galla"
+    ],
+  },
+ 
+  {
+    id: "song-066",
+    title: "Ghar More Pardesiya",
+    movie: "Kalank",
+    youtubeId: "ntC3sO-VeJY",
+    aliases: [
+      "ghar more pardesiya",
+      "ghar more pardesia",
+    ],
+  },
+ 
+  {
+    id: "song-067",
+    title: "First Class",
+    movie: "Kalank",
+    youtubeId: "e8B0AzmXPV8",
+    aliases: [
+      "first class",
+    ],
+  },
+ 
+  {
+    id: "song-068",
+    title: "Bulleya",
+    movie: "Ae Dil Hai Mushkil",
+    youtubeId: "wTgrZE9RWNY",
+    aliases: [
+      "bulleya",
+    ],
+  },
+ 
+  {
+    id: "song-069",
+    title: "Janam Janam",
+    movie: "Dilwale",
+    youtubeId: "cgmhimjsczk",
+    aliases: [
+      "janam janam",
+    ],
+  },
+ 
+  {
+    id: "song-070",
+    title: "Cham Cham",
+    movie: "Baaghi",
+    youtubeId: "f6vY6tYvKGA",
+    aliases: [
+      "cham cham",
+    ],
+  },
+ 
+  {
+    id: "song-071",
+    title: "Sooraj Dooba Hain",
+    movie: "Roy",
+    youtubeId: "nJZcbidTutE",
+    aliases: [
+      "sooraj dooba hain",
+      "sooraj dooba hain yaaron",
+    ],
+  },
+ 
+  {
+    id: "song-072",
+    title: "Genda Phool",
+    movie: "Badshah (non-film single)",
+    youtubeId: "SD4Z8dlZPd8",
+    aliases: [
+      "genda phool",
+      "boro loker beti lo",
+    ],
+  },
+ 
+  {
+    id: "song-073",
+    title: "Vaaste",
+    movie: "Dhvani Bhanushali (non-film single)",
+    youtubeId: "hG77NTZ0lhI",
+    aliases: [
+      "vaaste",
+    ],
+  },
+ 
+  {
+    id: "song-074",
+    title: "Ranjha",
+    movie: "Shershaah",
+    youtubeId: "V7LwfY5U5WI",
+    aliases: [
+      "ranjha",
+    ],
+  },
+ 
+  {
+    id: "song-075",
+    title: "Radha",
+    movie: "Student of the Year",
+    youtubeId: "21WUNX0JiYo",
+    aliases: [
+      "radha",
+    ],
+  },
+ 
+  {
+    id: "song-076",
+    title: "Saibo",
+    movie: "Shor in the City",
+    youtubeId: "GtNrQy90Ih4",
+    aliases: [
+      "saibo",
+    ],
+  },
+ 
+  {
+    id: "song-077",
+    title: "Tum Mile",
+    movie: "Tum Mile",
+    youtubeId: "45eEpFjhO2A",
+    aliases: [
+      "tum mile",
+      "tum mile title track",
+    ],
+  },
+ 
+  {
+    id: "song-078",
+    title: "Phir Le Aya Dil",
+    movie: "Barfi!",
+    youtubeId: "yr5Z9dODllI",
+    aliases: [
+      "phir le aya dil",
+    ],
+  },
+ 
+  {
+    id: "song-079",
+    title: "Sun Raha Hai Na Tu",
+    movie: "Aashiqui 2",
+    youtubeId: "eHRrZ5DQCV4",
+    aliases: [
+      "sun raha hai na tu",
+      "sunn raha hai",
+    ],
+  },
+ 
+  {
+    id: "song-080",
+    title: "Chahun Main Ya Naa",
+    movie: "Aashiqui 2",
+    youtubeId: "VdyBtGaspss",
+    aliases: [
+      "chahun main ya naa",
+      "chahoon main ya na",
+    ],
+  },
+ 
+  {
+    id: "song-081",
+    title: "Baby Ko Bass Pasand Hai",
+    movie: "Sultan",
+    youtubeId: "p062GuAhsRs",
+    aliases: [
+      "baby ko bass pasand hai",
+    ],
+  },
+ 
+  {
+    id: "song-082",
+    title: "Jag Ghoomeya",
+    movie: "Sultan",
+    youtubeId: "t10sQb0Zmjs",
+    aliases: [
+      "jag ghoomeya",
+      "jag ghumeya"
+    ],
+  },
+ 
+  {
+    id: "song-083",
+    title: "Tamma Tamma Again",
+    movie: "Badrinath Ki Dulhania",
+    youtubeId: "i4uJWdRb1C4",
+    aliases: [
+      "tamma tamma again",
+      "tamma tamma loge",
+      "tamma tamma"
+    ],
   },
 ];
