@@ -1,4 +1,4 @@
-export type GameMode = "song" | "actor";
+export type GameMode = "song" | "bollyscribble";
 export type ChallengeType = "truth-dare";
 
 export interface Player {

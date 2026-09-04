@@ -9,8 +9,8 @@ function CreateGame() {
   const [searchParams] = useSearchParams();
 
   const initialMode =
-    searchParams.get("mode") === "actor"
-      ? "actor"
+    searchParams.get("mode") === "bollyscribble"
+      ? "bollyscribble"
       : "song";
 
   const [name, setName] = useState("");
@@ -125,14 +125,14 @@ function CreateGame() {
 
                 <button
                   type="button"
-                  onClick={() => setMode("actor")}
+                  onClick={() => setMode("bollyscribble")}
                   className={`min-h-12 rounded-xl border font-semibold transition ${
-                    mode === "actor"
+                    mode === "bollyscribble"
                       ? "border-yellow-500 bg-yellow-500 text-black"
                       : "border-zinc-700 bg-zinc-950"
                   }`}
                 >
-                  🎤 Actors
+                  🎤 BollyScribble
                 </button>
 
               </div>
