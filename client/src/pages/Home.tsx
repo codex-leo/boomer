@@ -95,7 +95,7 @@ function Home() {
               </div>
 
               <h2 className="mt-5 text-xl font-bold">
-                Bollywood Song Guessor
+                Song Guessor
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-zinc-300">
