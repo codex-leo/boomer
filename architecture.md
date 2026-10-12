@@ -54,7 +54,10 @@ client/
     App.css                  unused Vite-template-style CSS (not imported)
     types.ts                 frontend Room, Player, and GameMode shapes
     lib/socket.ts            shared auto-connecting Socket.IO client
-    pages/                   Home, CreateGame, JoinGame, Lobby, and Game screens
+    pages/                   Home, CreateGame, JoinGame, Lobby, and game dispatcher
+      games/
+        index.ts             Mode-to-game component registry
+        SongGame.tsx         Song Guessor gameplay and result screens
   public/                    favicon and icon assets
   assets/                    Vite/React/hero image assets
 server/
@@ -85,19 +88,21 @@ The root contains only `.gitignore` besides these projects; it ignores dependenc
 | `/create` | `CreateGame` | Reads optional `mode` query parameter; collects nickname, mode, and 3/5/7/10/15 rounds; emits `create_room`. |
 | `/join` and `/join/:roomCode` | `JoinGame` | Collects nickname and normalized room code; emits `join_room`. |
 | `/lobby/:roomCode` | `Lobby` | Fetches room state, shows membership, host controls, QR/invite URL, and reacts to game countdown. |
-| `/game/:roomCode` | `Game` | Owns gameplay, score/result, and truth-or-dare UI state and Socket.IO listeners. |
+| `/game/:roomCode` | `Game` | Resolves the room's game mode and renders its registered game component. |
 
 `lib/socket.ts` exports one module-level Socket.IO client. It auto-connects when imported, uses `VITE_SERVER_URL` or localhost, and is shared by all pages. There is no explicit reconnect, authentication, or connection-error UI.
 
-### `Game.tsx` state and screens
+### Game mode components and shared routing
 
 `CreateGame.tsx` lets the host enable or disable post-game challenge modules. The selected `enabledChallenges` array is sent to the server when the room is created.
 
-`Game.tsx` stores transient client presentation state: three-second countdown and local visible timer; round and total-round numbers; the received YouTube ID; answer text, answer result, and correct-submission lock; revealed answer and sorted player list; final challenge state; and Play Again request state. It registers its listeners when mounted, emits `request_player_id`, and removes listeners on unmount.
+`pages/Game.tsx` is the game-mode dispatcher. When navigation comes from the lobby, `Lobby.tsx` passes the room's mode in route state so the selected component can mount immediately. If the game URL is opened directly or refreshed, `Game.tsx` requests the room with `get_room` and uses the returned mode. It looks up the component in `pages/games/index.ts`; adding a mode means implementing a game component and registering that mode there, without adding mode conditionals to the dispatcher.
+
+`pages/games/SongGame.tsx` currently owns the gameplay presentation and its transient client state: three-second countdown and local visible timer; round and total-round numbers; the received YouTube ID; answer text, answer result, and correct-submission lock; revealed answer and sorted player list; final challenge state; and Play Again request state. It registers its Socket.IO listeners when mounted, emits `request_player_id`, and removes listeners on unmount. The current registry maps both existing frontend modes (`song` and `bollyscribble`) to `SongGame`, preserving the current gameplay until another mode-specific component is implemented.
 
 On `game_countdown`, it displays local values 3, 2, and 1. On `round_started`, it receives only the question ID and YouTube ID, starts a local 30-second visual timer from the supplied duration, and renders an invisible 1px YouTube iframe with `autoplay=1`, `controls=0`, and `rel=0`. The visible panel contains only gameplay text, so audio is intended to play without displaying video. Browser autoplay policy, embed availability, and user/device settings can prevent this playback.
 
-The page sends `submit_answer` without a callback. Incorrect guesses leave the input enabled; a correct result disables the input locally. Score ordering and round closure always come from the server. Once `game_finished` arrives, the normal game screen is replaced by final scores and, when applicable, the truth-or-dare UI.
+`SongGame` sends `submit_answer` without a callback. Incorrect guesses leave the input enabled; a correct result disables the input locally. Score ordering and round closure always come from the server. Once `game_finished` arrives, the normal game screen is replaced by final scores and, when applicable, the truth-or-dare UI.
 
 ### Lobby invites and QR codes
 

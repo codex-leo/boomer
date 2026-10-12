@@ -23,7 +23,7 @@ function Lobby() {
 
     useEffect(() => {
         function handleGameCountdown() {
-            navigate(`/game/${roomCode}`);
+            navigate(`/game/${roomCode}`, { state: { mode: room?.mode } });
         }
 
         socket.on(
@@ -37,7 +37,7 @@ function Lobby() {
                 handleGameCountdown,
             );
         };
-    }, [navigate, roomCode]);
+        }, [navigate, room?.mode, roomCode]);
 
     useEffect(() => {
         function handleRoomUpdate(data: { room: Room }) {
